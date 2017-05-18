@@ -1,28 +1,27 @@
-with Dirent;
 with GNAT.Regexp;
--- with Task_Pool;
 
 package Finder is
-
-	procedure Initiate (Directory, Query : in String);
 
 	type Search_Mode is (
 		Plain,
 		Regular_Expression);
 
-	procedure Find_Start (Directory, Token : in String; Desired_Mode : in Search_Mode);
+	procedure Find_Start 
+		(Directory, Token : in String; 
+		 Desired_Mode : in Search_Mode;
+		 Desired_Depth : in Natural := Natural'Last);
 
 	Dir_Error : Exception;
 
 private
-	use Dirent;
+
+	Depth : Natural := 0;
+	Max_Depth : Natural;
 
 	Run_Mode : Search_Mode := Plain;
 	Search_Pattern : GNAT.Regexp.Regexp;
 	procedure Find (Directory, Token : in String);
 	procedure Write (Directory : in String);
-	-- package Query_Tasks is new Task_Pool (Worker=>Find, Writer=>Write);
-	-- use Query_Tasks;
 
 
 end Finder;
