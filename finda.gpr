@@ -1,0 +1,29 @@
+project Finda is
+
+    for Languages use ("Ada", "C");
+    for Source_Dirs  use ("src");
+    for Object_Dir use "obj";
+    for Exec_Dir use ".";
+
+    for Main use ("main.adb");
+
+    package Compiler is
+        for Default_Switches ("Ada") use ("-gnatwa", "-Ofast", "-march=native", "-gnat12");
+        for Default_Switches ("C") use ("-Wall", "-Ofast", "-march=native");
+    end Compiler;
+
+    package Binder is
+        for Switches ("Ada") use ("-shared");
+    end Binder;
+
+    package Builder is
+        for Default_Switches ("Ada") use ("-s", "-j4", "-k");
+        for Executable ("main.adb") use "finda";
+    end Builder;
+
+    package Linker is
+        for Default_Switches ("Ada") use ("-Wl,--gc-sections");
+    end Linker;
+
+end Finda;
+
