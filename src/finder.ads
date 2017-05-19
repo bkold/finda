@@ -8,20 +8,19 @@ package Finder is
 
 	procedure Find_Start 
 		(Directory, Token : in String; 
-		 Desired_Mode : in Search_Mode;
 		 Desired_Depth : in Natural := Natural'Last);
-
-	Dir_Error : Exception;
 
 private
 
-	Depth : Natural := 0;
+	
 	Max_Depth : Natural;
 
-	Run_Mode : Search_Mode := Plain;
-	Search_Pattern : GNAT.Regexp.Regexp;
-	procedure Find (Directory, Token : in String);
-	procedure Write (Directory : in String);
+	Match_Token : GNAT.Regexp.Regexp;
 
+	procedure Find (
+		Directory : in String; 
+		Depth : in Natural);
+
+	procedure Write (Directory : in String);
 
 end Finder;

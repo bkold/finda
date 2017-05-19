@@ -5,26 +5,18 @@ with Finder;
 
 procedure Main is
 	Pattern : String (1 .. 50);
-	Mode : Finder.Search_Mode;
 	Depth : Natural := Natural'Last;
 begin
 	loop
-		case Getopt ("e= p= d=") is
+		case Getopt ("e= d=") is
 			when 'e' =>
-				-- Put_Line ("Seen -e with arg=" & Parameter);
 				Move(Parameter, Pattern);
-				Mode := Finder.Regular_Expression;
-			when 'p' =>
-				-- Put_Line ("Seen -e with arg=" & Parameter);
-				Move(Parameter, Pattern);
-				Mode := Finder.Plain;
 			when 'd' =>
-				-- Put_Line ("Seen -e with arg=" & Parameter);
 				Depth := Natural'Value(Parameter);
 			when others =>
 				exit;
 		end case;
 	end loop;
 
-	Finder.Find_Start(Get_Argument, Trim(Pattern, Both), Mode, Depth);
+	Finder.Find_Start(Get_Argument, Trim(Pattern, Both), Depth);
 end Main;

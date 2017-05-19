@@ -1,5 +1,4 @@
 package Dirent is
-	pragma Preelaborate(Dirent);
 
 	type I_No is mod 2**64;
 
@@ -23,7 +22,7 @@ package Dirent is
 	SOCK    : constant Directory_Mode;
 	WHT     : constant Directory_Mode;
 
-	function Close (Item : in Directory_Type) return Integer;
+	procedure Close (Item : in Directory_Type);
 
 	function Open (Name : in String) return Directory_Type;
 
@@ -42,6 +41,8 @@ package Dirent is
 	function Number (Item : in Directory_Entry) return I_No;
 
 	function Mode (Item : in Directory_Entry) return Directory_Mode;
+
+	Dir_Error : Exception;
 
 private
 
@@ -66,7 +67,6 @@ private
 	SOCK    : constant Directory_Mode := 12;
 	WHT     : constant Directory_Mode := 14;
 
-	pragma Import(C, Close,  "closedir");
 	pragma Import(C, Read,   "readdir");
 	pragma Import(C, Read_R, "readdir_r");
 	pragma Import(C, Rewind, "rewinddir");

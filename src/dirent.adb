@@ -22,4 +22,14 @@ package body Dirent is
 		return Value(Name_Pointer);
 	end Name;
 
+	procedure Close (Item : in Directory_Type) is
+		function Close (Item : in Directory_Type) return Integer 
+			with Import, Convention=>C, Link_Name=>"closedir";
+	begin
+		if Close(Item) /= 0 then
+			raise Dir_Error;
+		end if;
+	end;
+
+
 end Dirent;
