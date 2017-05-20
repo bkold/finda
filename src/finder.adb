@@ -1,7 +1,6 @@
 with Dirent; use Dirent;
 with Ada.Text_IO;
-with Ada.Strings;
-with Ada.Strings.Fixed;
+with Ada.Strings.Unbounded;
 
 package body Finder is
 
@@ -9,10 +8,15 @@ package body Finder is
 		Directory, Token : in String;
 		Desired_Depth : in Natural := Natural'Last)
 	is
+		Thread_Check_Return : Thread_Access;
 	begin
 		Max_Depth := Desired_Depth;
 		Match_Token := GNAT.Regexp.Compile(Token, True);
-		Find(Directory, 0);
+		for I in CPU'Range loop
+			Threads(I) := new Thread(I);
+		end loop;
+		Task_Pool_Status.Check(Thread_Check_Return);
+		Thread_Check_Return.Run(Directory, 0);
 	end;
 
 	procedure Find (
@@ -30,7 +34,7 @@ package body Finder is
 
 				declare
 					Entry_Name : constant String := Name(D_Entry);
-					Thread_Check_Return : Integer;
+					Thread_Check_Return : Thread_Access;
 				begin
 					if GNAT.Regexp.Match(Entry_Name, Match_Token) then
 						Write(Directory & '/' & Entry_Name);
@@ -40,12 +44,11 @@ package body Finder is
 						if Mode(D_Entry) = DIR and
 						then Entry_Name /= ".." and then Entry_Name /= "." then
 							Task_Pool_Status.Check(Thread_Check_Return);
-							case (Thread_Check_Return) is
-								when 1 => Thread_1.Run(Directory & '/' & Entry_Name, Depth+1);
-								when 2 => Thread_2.Run(Directory & '/' & Entry_Name, Depth+1);
-								when 3 => Thread_3.Run(Directory & '/' & Entry_Name, Depth+1);
-								when others => Find(Directory & '/' & Entry_Name, Depth+1);
-							end case;
+							if Thread_Check_Return /= Null then
+								Thread_Check_Return.Run(Directory & '/' & Entry_Name, Depth+1);
+							else
+								Find(Directory & '/' & Entry_Name, Depth+1);
+							end if;
 						end if;
 					end if;
 				end;
@@ -61,18 +64,17 @@ package body Finder is
 	end Write;
 
 	task body Thread is
-		use Ada.Strings;
-		use Ada.Strings.Fixed;
-		Directory : String(1 .. 200);
+		use Ada.Strings.Unbounded;
+		Directory : Unbounded_String;
 		Local_Depth : Natural;
 	begin
 		loop
 			select
 				accept Run (D : in String; Depth : in Natural) do
-					Move(D, Directory);
+					Directory := To_Unbounded_String(D);
 					Local_Depth := Depth;
 				end Run;
-				Find(Trim(Directory, Both), Local_Depth);
+				Find(To_String(Directory), Local_Depth);
 				Task_Pool_Status.End_Thread(Num);
 			or
 				terminate;
@@ -81,18 +83,21 @@ package body Finder is
 	end Thread;
 
 	protected body Task_Pool_Status is
-		procedure Check (Value : out Integer) is
+		procedure Check (Thread_Pointer : out Thread_Access) is
 		begin
-			if    Status(1) then Value := 1; Status(1) := False;
-			elsif Status(2) then Value := 2; Status(2) := False;
-			elsif Status(3) then Value := 3; Status(3) := False;
-			else Value := 0;
-			end if;
+			for I in Status'Range loop
+				if Status(I) = Ready then
+					Status(I) := Working;
+					Thread_Pointer := Threads(I);
+					return;
+				end if;
+			end loop;
+			Thread_Pointer := Null;
 		end Check;
 
-		procedure End_Thread (Thread_Num : in Integer) is
+		procedure End_Thread (Thread_Num : in CPU) is
 		begin
-			Status(Thread_Num) := True;
+			Status(Thread_Num) := Ready;
 		end End_Thread;
 	end Task_Pool_Status;
 
