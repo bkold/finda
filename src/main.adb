@@ -1,15 +1,16 @@
 with GNAT.Command_Line; use GNAT.Command_Line;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with System.Multiprocessors; use System.Multiprocessors;
 with Ada.Text_IO;
--- with System.Microprocessors; use System.Microprocessors;
 with Finder;
 
 procedure Main is
-	type CPU is range 1 .. 4;
 	Pattern : Unbounded_String := Null_Unbounded_String;
 	Depth : Natural := Natural'Last;
-	Thread_Count : CPU := CPU'Last/2;
+	Thread_Count : CPU := Number_Of_CPUs/2;
 begin
+	Ada.Text_IO.Put_Line(CPU'Image(Thread_Count));
+
 	loop
 		case Getopt ("e= d= t=") is
 			when 'e' =>
