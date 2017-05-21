@@ -8,6 +8,7 @@ Finda was designed as a leaner, meaner find tool, as compared to the current def
 ## Usage
 
 The current flags are
+
     -e - pattern, specify the regex to match
     -t - number of threads to use
     -d - maximum depth to search to
