@@ -3,7 +3,7 @@ A file search tool for linux
 
 ## About
 
-Finda was designed as a leaner, meaner find tool, as compared to the current default 'find' in Linux systems. In it's current state it is 3x faster and a fraction of the binary size, at the cost of some features.
+Finda was designed as a leaner, meaner find tool, as compared to the current default 'find' in Linux systems. In its current state it is 3x faster and a fraction of the binary size, at the cost of some features.
 
 ## Usage
 
