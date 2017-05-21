@@ -3,6 +3,7 @@ with Ada.Text_IO;
 with Ada.Strings.Unbounded;
 
 package body Finder is
+	pragma Suppress (All_Checks);
 
 	procedure Find_Start (
 		Directory, Token : in String;
