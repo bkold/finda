@@ -7,8 +7,11 @@ package body Finder is
 	procedure Find_Start (Directory : in String) is
 		Thread_Check_Return : Thread_Access;
 	begin
-		Task_Pool.Initialize;
-		Task_Pool.Check_Out(Thread_Check_Return);
+		loop
+			Task_Pool.Check_Out(Thread_Check_Return);
+			exit when Thread_Check_Return /= Null;
+			delay 0.0;
+		end loop;
 		Thread_Check_Return.Run(Directory, 0);
 	end;
 
@@ -85,10 +88,13 @@ package body Finder is
 	protected body Task_Pool is
 		procedure Initialize is
 		begin
-			for I in CPU'Range loop
-				Threads(I) := new Thread(I);
-				Thread_Stack.Push(Status, I);
-			end loop;
+			if not Is_Initialized then
+				for I in CPU'Range loop
+					Threads(I) := new Thread(I);
+					Thread_Stack.Push(Status, I);
+				end loop;
+				Is_Initialized := True;
+			end if;
 		end Initialize;
 
 		procedure Check_Out (Thread_Pointer : out Thread_Access) is
@@ -106,5 +112,9 @@ package body Finder is
 			Thread_Stack.Push(Status, Thread_Num);
 		end End_Thread;
 	end Task_Pool;
+
+begin
+
+	Task_Pool.Initialize;
 
 end Finder;

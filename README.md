@@ -12,12 +12,17 @@ The current flags are
     -e - pattern, specify the regex to match
     -t - number of threads to use
     -d - maximum depth to search to
+    -p - print results with colors
+
+    --help - display use info
+
+    Multiple paths are allowed
 
 ### Examples
 
     finda / -e=*find*
     finda / -e=g-*.ads -t=8
-    finda /home -e=picture.png -t=8 -d=12
+    finda /home /bin -e=picture.png -t=8 -d=12
 
 ## Installation
 

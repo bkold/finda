@@ -13,7 +13,7 @@ procedure Main is
 
 begin
 
-	begin
+	Parse_Argunents:begin
 		loop
 			case Getopt ("e= d= t= p -help") is
 				when 'e' =>
@@ -28,7 +28,7 @@ begin
 				when '-' =>
 					if Full_Switch = "-help" then
 						Put_Line(Standard_Error,
-							"Usage: finda [path...] [-e=pattern] [-t=thread_number] [-d=depth_number] [-p]");
+							"Usage: finda [paths...] [-e=pattern] [-t=thread_number] [-d=depth_number] [-p]");
 						New_Line(Standard_Error, 1);
 						Put_Line(Standard_Error,
 							"default depth number is system's max standard integer value; " &
@@ -55,17 +55,27 @@ begin
 		when GNAT.Regexp.Error_In_Regexp =>
 			Put_Line(Standard_Error, "There was an error with the regular expression");
 			return;
-	end;
+	end Parse_Argunents;
 
-	if not Got_Regex then
-		Put_Line(Standard_Error, "No pattern was set");
-		return;
-	end if;
+	Verify_All_Parameters:begin
+		if not Got_Regex then
+			Put_Line(Standard_Error, "No pattern was set");
+			return;
+		end if;
+	end Verify_All_Parameters;
 
-	declare
+	Iterate_Given_Directories:declare
 		subtype CPU_Subrange is CPU range 1 .. Thread_Count;
 		package F is new Finder(CPU_Subrange, Depth, Match_Token, Pretty_Print);
 	begin
-		F.Find_Start(Get_Argument);
-	end;
+		loop
+			declare
+				New_Directory : constant String := Get_Argument;
+			begin
+				exit when New_Directory = "";
+				F.Find_Start(New_Directory);
+			end;
+		end loop;
+	end Iterate_Given_Directories;
+
 end Main;

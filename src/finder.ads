@@ -2,6 +2,7 @@ with Dirent; use Dirent;
 with GNAT.Regexp;
 with Stack;
 
+
 generic
 	type CPU is range <>;
 	Max_Depth : Natural;
@@ -9,6 +10,7 @@ generic
 	Pretty_Print : Boolean;
 
 package Finder is
+	pragma Elaborate_Body;
 
 	procedure Find_Start (Directory : in String);
 
@@ -30,6 +32,7 @@ private
 	private
 		Status : Thread_Stack.Stack_Type;
 		Threads : Thread_Access_Array;
+		Is_Initialized : Boolean := False;
 	end Task_Pool;
 
 	procedure Find (
