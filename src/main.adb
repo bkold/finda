@@ -1,6 +1,7 @@
 with GNAT.Command_Line; use GNAT.Command_Line;
 with System.Multiprocessors; use System.Multiprocessors;
 with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Directories;
 with GNAT.Regexp;
 with Finder;
 
@@ -10,12 +11,13 @@ procedure Main is
 	Match_Token : GNAT.Regexp.Regexp;
 	Got_Regex : Boolean := False;
 	Pretty_Print : Boolean := False;
+	Use_Full_Path : Boolean := False;
 
 begin
 
 	Parse_Argunents:begin
 		loop
-			case Getopt ("e= d= t= p -help") is
+			case Getopt ("e= d= t= p f -help") is
 				when 'e' =>
 					Match_Token := GNAT.Regexp.Compile(Parameter, True);
 					Got_Regex := True;
@@ -25,15 +27,18 @@ begin
 					Thread_Count := CPU'Value(Parameter);
 				when 'p' =>
 					Pretty_Print := True;
+				when 'f' =>
+					Use_Full_Path := True;
 				when '-' =>
 					if Full_Switch = "-help" then
 						Put_Line(Standard_Error,
-							"Usage: finda [paths...] [-e=pattern] [-t=thread_number] [-d=depth_number] [-p]");
+							"Usage: finda [paths...] [-e=pattern] [-t=thread_number] [-d=depth_number] [-p] [-f]");
 						New_Line(Standard_Error, 1);
 						Put_Line(Standard_Error,
 							"default depth number is system's max standard integer value; " &
 							"default thread number is half of the total number of cpus; " &
 							"default printing scheme is plain; " &
+							"default path printing scheme is relative; " &
 							"there is no default path;");
 						New_Line(Standard_Error, 1);
 						return;
@@ -73,7 +78,11 @@ begin
 				New_Directory : constant String := Get_Argument;
 			begin
 				exit when New_Directory = "";
-				F.Find_Start(New_Directory);
+				if Use_Full_Path then
+					F.Find_Start(Ada.Directories.Full_Name(New_Directory));
+				else
+					F.Find_Start(New_Directory);
+				end if;
 			end;
 		end loop;
 	end Iterate_Given_Directories;
