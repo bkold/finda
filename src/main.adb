@@ -12,12 +12,13 @@ procedure Main is
 	Got_Regex : Boolean := False;
 	Pretty_Print : Boolean := False;
 	Use_Full_Path : Boolean := False;
+	Match_Full_Path : Boolean := False;
 
 begin
 
 	Parse_Argunents:begin
 		loop
-			case Getopt ("e= d= t= p f -help") is
+			case Getopt ("e= d= t= p a f -help") is
 				when 'e' =>
 					Match_Token := GNAT.Regexp.Compile(Parameter, True);
 					Got_Regex := True;
@@ -27,18 +28,21 @@ begin
 					Thread_Count := CPU'Value(Parameter);
 				when 'p' =>
 					Pretty_Print := True;
-				when 'f' =>
+				when 'a' =>
 					Use_Full_Path := True;
+				when 'f' =>
+					Match_Full_Path := True;
 				when '-' =>
 					if Full_Switch = "-help" then
 						Put_Line(Standard_Error,
-							"Usage: finda [paths...] [-e=pattern] [-t=thread_number] [-d=depth_number] [-p] [-f]");
+							"Usage: finda [paths...] [-e=pattern] [-t=thread_number] [-d=depth_number] [-p] [-a] [-f]");
 						New_Line(Standard_Error, 1);
 						Put_Line(Standard_Error,
 							"default depth number is system's max standard integer value; " &
 							"default thread number is half of the total number of cpus; " &
 							"default printing scheme is plain; " &
 							"default path printing scheme is relative; " &
+							"default matching scheme is 'file name'; " &
 							"there is no default path;");
 						New_Line(Standard_Error, 1);
 						return;
@@ -71,7 +75,7 @@ begin
 
 	Iterate_Given_Directories:declare
 		subtype CPU_Subrange is CPU range 1 .. Thread_Count;
-		package F is new Finder(CPU_Subrange, Depth, Match_Token, Pretty_Print);
+		package F is new Finder(CPU_Subrange, Depth, Match_Token, Pretty_Print, Match_Full_Path);
 	begin
 		loop
 			declare

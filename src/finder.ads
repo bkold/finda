@@ -2,12 +2,12 @@ with Dirent; use Dirent;
 with GNAT.Regexp;
 with Stack;
 
-
 generic
 	type CPU is range <>;
 	Max_Depth : Natural;
 	Match_Token : GNAT.Regexp.Regexp;
 	Pretty_Print : Boolean;
+	Match_All : Boolean;
 
 package Finder is
 	pragma Elaborate_Body;

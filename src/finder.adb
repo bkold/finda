@@ -30,10 +30,17 @@ package body Finder is
 
 				declare
 					Entry_Name : constant String := Name(D_Entry);
+					Full_Entry_Name : constant String := Directory & '/' & Entry_Name;
 					Thread_Check_Return : Thread_Access;
 				begin
-					if GNAT.Regexp.Match(Entry_Name, Match_Token) then
-						Write(Directory & '/' & Entry_Name, Mode(D_Entry));
+					if Match_All then
+						if GNAT.Regexp.Match(Full_Entry_Name, Match_Token) then
+							Write(Full_Entry_Name, Mode(D_Entry));
+						end if;
+					else
+						if GNAT.Regexp.Match(Entry_Name, Match_Token) then
+							Write(Full_Entry_Name, Mode(D_Entry));
+						end if;
 					end if;
 
 					if Depth < Max_Depth then
@@ -41,9 +48,9 @@ package body Finder is
 						then Entry_Name /= ".." and then Entry_Name /= "." then
 							Task_Pool.Check_Out(Thread_Check_Return);
 							if Thread_Check_Return /= Null then
-								Thread_Check_Return.Run(Directory & '/' & Entry_Name, Depth+1);
+								Thread_Check_Return.Run(Full_Entry_Name, Depth+1);
 							else
-								Find(Directory & '/' & Entry_Name, Depth+1);
+								Find(Full_Entry_Name, Depth+1);
 							end if;
 						end if;
 					end if;
