@@ -13,6 +13,8 @@ The current flags are
     -t - number of threads to use
     -d - maximum depth to search to
     -p - print results with colors
+    -a - print full path
+    -f - match against full path (locate's default)
 
     --help - display use info
 
