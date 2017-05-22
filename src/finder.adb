@@ -1,22 +1,14 @@
-with Dirent; use Dirent;
 with Ada.Text_IO;
 with Ada.Strings.Unbounded;
 
 package body Finder is
 	pragma Suppress (All_Checks);
 
-	procedure Find_Start (
-		Directory, Token : in String;
-		Desired_Depth : in Natural := Natural'Last)
-	is
+	procedure Find_Start (Directory : in String) is
 		Thread_Check_Return : Thread_Access;
 	begin
-		Max_Depth := Desired_Depth;
-		Match_Token := GNAT.Regexp.Compile(Token, True);
-		for I in CPU'Range loop
-			Threads(I) := new Thread(I);
-		end loop;
-		Task_Pool_Status.Check(Thread_Check_Return);
+		Task_Pool.Initialize;
+		Task_Pool.Check_Out(Thread_Check_Return);
 		Thread_Check_Return.Run(Directory, 0);
 	end;
 
@@ -38,13 +30,13 @@ package body Finder is
 					Thread_Check_Return : Thread_Access;
 				begin
 					if GNAT.Regexp.Match(Entry_Name, Match_Token) then
-						Write(Directory & '/' & Entry_Name);
+						Write(Directory & '/' & Entry_Name, Mode(D_Entry));
 					end if;
 
 					if Depth < Max_Depth then
 						if Mode(D_Entry) = DIR and
 						then Entry_Name /= ".." and then Entry_Name /= "." then
-							Task_Pool_Status.Check(Thread_Check_Return);
+							Task_Pool.Check_Out(Thread_Check_Return);
 							if Thread_Check_Return /= Null then
 								Thread_Check_Return.Run(Directory & '/' & Entry_Name, Depth+1);
 							else
@@ -59,9 +51,16 @@ package body Finder is
 		end if;
 	end Find;
 
-	procedure Write (Directory : in String) is
+	procedure Write (Directory : in String; Mode : in Directory_Mode) is
 	begin
-		Ada.Text_IO.Put_Line(Directory);
+		if Pretty_Print then
+			if Mode = DIR then Ada.Text_IO.Put_Line(ASCII.esc & "[92m" & Directory & ASCII.esc & "[39m");
+			elsif Mode = LNK then Ada.Text_IO.Put_Line(ASCII.esc & "[96m" & Directory & ASCII.esc & "[39m");
+			else Ada.Text_IO.Put_Line(Directory);
+			end if;
+		else
+			Ada.Text_IO.Put_Line(Directory);
+		end if;
 	end Write;
 
 	task body Thread is
@@ -76,30 +75,36 @@ package body Finder is
 					Local_Depth := Depth;
 				end Run;
 				Find(To_String(Directory), Local_Depth);
-				Task_Pool_Status.End_Thread(Num);
+				Task_Pool.End_Thread(Num);
 			or
 				terminate;
 			end select;
 		end loop;
 	end Thread;
 
-	protected body Task_Pool_Status is
-		procedure Check (Thread_Pointer : out Thread_Access) is
+	protected body Task_Pool is
+		procedure Initialize is
 		begin
-			for I in Status'Range loop
-				if Status(I) = Ready then
-					Status(I) := Working;
-					Thread_Pointer := Threads(I);
-					return;
-				end if;
+			for I in CPU'Range loop
+				Threads(I) := new Thread(I);
+				Thread_Stack.Push(Status, I);
 			end loop;
-			Thread_Pointer := Null;
-		end Check;
+		end Initialize;
+
+		procedure Check_Out (Thread_Pointer : out Thread_Access) is
+			use Thread_Stack;
+		begin
+			if not Is_Empty(Status) then
+				Thread_Pointer := Threads(Pop(Status));
+			else
+				Thread_Pointer := Null;
+			end if;
+		end Check_Out;
 
 		procedure End_Thread (Thread_Num : in CPU) is
 		begin
-			Status(Thread_Num) := Ready;
+			Thread_Stack.Push(Status, Thread_Num);
 		end End_Thread;
-	end Task_Pool_Status;
+	end Task_Pool;
 
 end Finder;

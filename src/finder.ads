@@ -1,23 +1,18 @@
+with Dirent; use Dirent;
 with GNAT.Regexp;
+with Stack;
 
 generic
 	type CPU is range <>;
+	Max_Depth : Natural;
+	Match_Token : GNAT.Regexp.Regexp;
+	Pretty_Print : Boolean;
 
 package Finder is
 
-	type Search_Mode is (
-		Plain,
-		Regular_Expression);
-
-	procedure Find_Start (
-		Directory, Token : in String;
-		Desired_Depth : in Natural := Natural'Last);
+	procedure Find_Start (Directory : in String);
 
 private
-
-	Max_Depth : Natural;
-
-	Match_Token : GNAT.Regexp.Regexp;
 
 	task type Thread (Num : CPU) is
 		entry Run (D : in String; Depth : in Natural);
@@ -25,22 +20,22 @@ private
 
 	type Thread_Access is access all Thread;
 	type Thread_Access_Array is array (CPU) of Thread_Access;
-	type Status is (Working, Ready);
-	type Status_Array is array (CPU) of Status;
 
-	Threads : Thread_Access_Array := (others=>Null);
+	package Thread_Stack is new Stack (Positive(CPU'Last), CPU);
 
-	protected Task_Pool_Status is
-		procedure Check (Thread_Pointer : out Thread_Access);
+	protected Task_Pool is
+		procedure Initialize;
+		procedure Check_Out (Thread_Pointer : out Thread_Access);
 		procedure End_Thread (Thread_Num : in CPU);
 	private
-		Status : Status_Array := (others=>Ready);
-	end Task_Pool_Status;
+		Status : Thread_Stack.Stack_Type;
+		Threads : Thread_Access_Array;
+	end Task_Pool;
 
 	procedure Find (
 		Directory : in String;
 		Depth : in Natural);
 
-	procedure Write (Directory : in String);
+	procedure Write (Directory : in String; Mode : in Directory_Mode);
 
 end Finder;
