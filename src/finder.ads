@@ -6,8 +6,8 @@ generic
 	type CPU is range <>;
 	Max_Depth : Natural;
 	Match_Token : GNAT.Regexp.Regexp;
-	Pretty_Print : Boolean;
 	Match_All : Boolean;
+	with procedure Write (Directory : in String; Mode : in Directory_Mode);
 
 package Finder is
 	pragma Elaborate_Body;
@@ -38,7 +38,5 @@ private
 	procedure Find (
 		Directory : in String;
 		Depth : in Natural);
-
-	procedure Write (Directory : in String; Mode : in Directory_Mode);
 
 end Finder;

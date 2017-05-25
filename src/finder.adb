@@ -61,17 +61,6 @@ package body Finder is
 		end if;
 	end Find;
 
-	procedure Write (Directory : in String; Mode : in Directory_Mode) is
-	begin
-		if Pretty_Print then
-			if Mode = DIR then Ada.Text_IO.Put_Line(ASCII.esc & "[92m" & Directory & ASCII.esc & "[39m");
-			elsif Mode = LNK then Ada.Text_IO.Put_Line(ASCII.esc & "[96m" & Directory & ASCII.esc & "[39m");
-			else Ada.Text_IO.Put_Line(Directory);
-			end if;
-		else
-			Ada.Text_IO.Put_Line(Directory);
-		end if;
-	end Write;
 
 	task body Thread is
 		use Ada.Strings.Unbounded;
