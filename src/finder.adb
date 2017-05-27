@@ -1,8 +1,6 @@
-with Ada.Text_IO;
 with Ada.Strings.Unbounded;
 
 package body Finder is
-	pragma Suppress (All_Checks);
 
 	procedure Find_Start (Directory : in String) is
 		Thread_Check_Return : Thread_Access;
@@ -85,7 +83,7 @@ package body Finder is
 		procedure Initialize is
 		begin
 			if not Is_Initialized then
-				for I in CPU'Range loop
+				for I in CPU_Local'Range loop
 					Threads(I) := new Thread(I);
 					Thread_Stack.Push(Status, I);
 				end loop;
@@ -103,7 +101,7 @@ package body Finder is
 			end if;
 		end Check_Out;
 
-		procedure End_Thread (Thread_Num : in CPU) is
+		procedure End_Thread (Thread_Num : in CPU_Local) is
 		begin
 			Thread_Stack.Push(Status, Thread_Num);
 		end End_Thread;

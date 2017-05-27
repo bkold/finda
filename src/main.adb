@@ -7,19 +7,21 @@ with GNAT.Regexp;
 with Finder;
 
 procedure Main is
+	subtype CPU_Local is CPU range 1 .. Number_Of_CPUs;
+
 	Designated_Printer : Write_Procedure_Pointer := Write_Plain'access;
-	Depth : Natural := Natural'Last;
-	Thread_Count : CPU := CPU'Max(CPU_Range(Number_Of_CPUs)/2, 1);
-	Match_Token : GNAT.Regexp.Regexp;
-	Got_Regex : Boolean := False;
-	Use_Full_Path : Boolean := False;
-	Match_Full_Path : Boolean := False;
+	Depth              : Natural := Natural'Last;
+	Thread_Count       : CPU_Local := Number_Of_CPUs;
+	Match_Token        : GNAT.Regexp.Regexp;
+	Got_Regex          : Boolean := False;
+	Use_Full_Path      : Boolean := False;
+	Match_Full_Path    : Boolean := False;
 
 	Help_Text : constant String :=
 		"Usage: finda [paths...] [-e=pattern] [-t:thread_number] [-d:depth_number] [-p:scheme] [-a] [-f]" & ASCII.LF &
 		ASCII.LF &
 		"default depth number is system's max standard integer value; " &
-		"default thread number is half of the total number of cpus; " &
+		"default thread number is the total number of cpus; " &
 		"default printing scheme is plain; " &
 		"default path printed is relative; " &
 		"default matching scheme is 'file name'; " &
@@ -51,7 +53,7 @@ begin
 				when 'd' =>
 					Depth := Natural'Value(Parameter);
 				when 't' =>
-					Thread_Count := CPU'Value(Parameter);
+					Thread_Count := CPU_Local'Value(Parameter);
 				when 'p' =>
 					case Natural'Value(Parameter) is
 					when 0 =>
@@ -86,7 +88,7 @@ begin
 		when Constraint_Error =>
 			Put(Standard_Error, "Input for '" & Full_Switch & "' out of valid range ");
 			if Full_Switch = "d" then Put_Line(Standard_Error, "of" & Natural'Image(Natural'First) & " ..." & Natural'Image(Natural'Last));
-			elsif Full_Switch = "t" then Put_Line(Standard_Error, "of" & CPU'Image(CPU'First) & " ..." & CPU'Image(CPU'Last));
+			elsif Full_Switch = "t" then Put_Line(Standard_Error, "of" & CPU_Local'Image(CPU_Local'First) & " ..." & CPU_Local'Image(CPU_Local'Last));
 			elsif Full_Switch = "p" then Put_Line(Standard_Error, "of" & Natural'Image(0) & " ..." & Natural'Image(3));
 			end if;
 			Put_Line(Standard_Error, Help_Text);

@@ -1,8 +1,11 @@
 generic
 	Size : in Positive;
 	type Element_Type is private;
+
 package Stack is
 	pragma SPARK_Mode (On);
+	pragma Suppress (All_Checks);
+
 	type Stack_Type is limited private with
 		Default_Initial_Condition => Is_Empty (Stack_Type);
 

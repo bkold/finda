@@ -1,3 +1,6 @@
+with System;
+with Ada.Unchecked_Conversion;
+
 package Dirent is
 
 	type I_No is mod 2**64;
@@ -46,13 +49,15 @@ package Dirent is
 
 private
 
-	type Void_Ptr is mod 2**64;
+	type Void_Ptr is mod System.Memory_Size;
 
 	type Directory_Type is new Void_Ptr;
-	Null_Directory : constant Directory_Type := 0;
+	function Convert is new Ada.Unchecked_Conversion (System.Address, Directory_Type);
+	Null_Directory : constant Directory_Type := Convert(System.Null_Address);
 
 	type Directory_Entry is new Void_Ptr;
-	Null_Entry : constant Directory_Entry := 0;
+	function Convert is new Ada.Unchecked_Conversion (System.Address, Directory_Entry);
+	Null_Entry : constant Directory_Entry := Convert(System.Null_Address);
 
 	type Directory_Mode is new Integer
 		with Static_Predicate => Directory_Mode in 0 | 1 | 2 | 4 | 6 | 8 | 10 | 12 | 14 ;
